@@ -96,9 +96,11 @@ app.get('/searchItems', async (req, res) => {
     if(items.items)
     {
        responseItems = items.items.map(item => {
-      return { ItemName: item.itemData.name, ItemDesc: item.itemData.description };
+console.log(item.customAttributeValues.productInfo)
+      return { ItemName: item.itemData.name, ItemDesc: item.customAttributeValues.productInfo.stringValue, ItemSeller: item.customAttributeValues.seller.stringValue , ItemPrice: item.customAttributeValues.price.stringValue , ItemLat: item.customAttributeValues.lat.stringValue , ItemLon: item.customAttributeValues.lng.stringValue, ItemAddr: item.customAttributeValues.addr.stringValue };
     });
     }
+    console.log(responseItems)
     res.json(responseItems);
   } catch (error) {
     console.log(error);
