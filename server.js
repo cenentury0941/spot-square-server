@@ -97,7 +97,7 @@ app.get('/searchItems', async (req, res) => {
     {
        responseItems = items.items.map(item => {
 console.log(item.customAttributeValues.productInfo)
-      return { ItemName: item.itemData.name, ItemDesc: item.customAttributeValues.productInfo.stringValue, ItemSeller: item.customAttributeValues.seller.stringValue , ItemPrice: item.customAttributeValues.price.stringValue , ItemLat: item.customAttributeValues.lat.stringValue , ItemLon: item.customAttributeValues.lng.stringValue, ItemAddr: item.customAttributeValues.addr.stringValue };
+      return { ItemName: item.itemData.name, ItemDesc: item.customAttributeValues.productInfo.stringValue, ItemSeller: item.customAttributeValues.seller.stringValue , ItemPrice: item.customAttributeValues.price.stringValue , ItemLat: item.customAttributeValues.lat.stringValue , ItemLon: item.customAttributeValues.lng.stringValue, ItemAddr: item.customAttributeValues.addr.stringValue, ItemID: item.id };
     });
     }
     console.log(responseItems)
