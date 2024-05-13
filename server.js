@@ -1,5 +1,20 @@
+import OpenAI from "openai";
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
+const k1 = "sk-pr"
+const k2 = "oj-Lrhww3MKD8yPQj"
+const k3 = "EFQK1fT3BlbkFJ4rCxTDEd4Z2QFmcNSM6E"
+
+const openai = new OpenAI({
+  organization: 'org-RZ3uSWP75ShMsyLdXuc7Hot7',
+  project: 'proj_0WEjxf45f4LX6KeADZdGKKdp',
+  apiKey: k1+k2+k3
+});
+
 const { Client, Environment, ApiError } = require("square");
 const express = require('express');
+var bodyParser = require('body-parser')
 const app = express();
 var cors = require('cors')
 const port = 3900;
@@ -40,6 +55,74 @@ async function getLocations() {
   }
 };
 
+let serverRes = "Server Res"
+
+async function chat(query){
+
+const assistant = await openai.beta.assistants.retrieve(
+    "asst_l83vDzn9QleHAW2myQWCTJo7"
+  );
+
+const thread = await openai.beta.threads.create();
+
+console.log("Got here " + query)
+
+const message = await openai.beta.threads.messages.create(
+  thread.id,
+  {
+    role: "user",
+    content: query
+  }
+);
+
+console.log("Got fucked")
+
+let run = await openai.beta.threads.runs.createAndPoll(
+  thread.id,
+  { 
+    assistant_id: assistant.id,
+    instructions: "Keep answers short. Do not include lists in the response. Only answer questions related to interior decor and utilities"
+  }
+);
+
+console.log("Got fucked")
+
+
+    const retrieveRun = async () => {
+      let keepRetrievingRun;
+      console.log("Getting Fucked")
+      while (run.status !== "completed") {
+        run = await openai.beta.threads.runs.retrieve(
+          thread.id, // Use the stored thread ID for this user
+          run.id
+        );
+
+        console.log(`Run status: ${run.status}`);
+
+        if (run.status === "completed") {
+	      const messages = await openai.beta.threads.messages.list(
+    	   run.thread_id
+  	    );
+        for (const message of messages.data) {
+          console.log(`${message.role} > ${message.content[0].text.value}`);
+          serverRes = message.content[0].text.value;
+          return message.content[0].text.value;
+        }
+       }
+      }
+      if (run.status === "completed") {
+	      const messages = await openai.beta.threads.messages.list(
+    	   run.thread_id
+  	    );
+        for (const message of messages.data) {
+          console.log(`${message.role} > ${message.content[0].text.value}`);
+          serverRes = message.content[0].text.value;
+          return message.content[0].text.value;
+        }
+       }
+    };
+    return await retrieveRun();
+}
 
 
 async function getItems() {
@@ -65,15 +148,14 @@ try {
 }
 }
 
-app.get('/items', async (req, res) => {
-  try {
-    const items = await getItems();
-    console.log(items)
-    res.json( [ { ItemName : items.objects[0].itemData.name , ItemDesc : items.objects[0].itemData.description } ] );
-  } catch (error) {
-    console.log(error)	
-    res.status(500).json({ message: 'Internal server error' });
-  }
+var rawParses = bodyParser.raw()
+
+app.post('/chat', express.raw({ type: '*/*' }), async (req, res) => {
+        const inputString = req.body.toString();
+        console.log("Input String : " + inputString)
+        const processedString = await chat(inputString);
+        res.send(processedString);
+
 });
 
 app.get('/items', async (req, res) => {
